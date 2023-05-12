@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+
+<p><strong>Here is What I Found about Chinese Students Planning to Study Abroad after Analyzing 540,000+ Lines of WeChat Chat History</strong></p>
+<p><strong>Abstract</strong></p>
+<p>As the admission requirements of schools and students’ conditions change every year along with global political and economic development, students often have new expectations for their application results and study abroad services. In this project, I performed a quantitative analysis on WeChat chat records between me and 118 students and their families to find out what Chinese students care about the most in studying abroad and how practitioners in the education industry could provide effective service to them.</p>
+<p><strong>Content</strong></p>
+<p>Introduction</p>
+<p>Step 1: Data Collection - Exporting WeChat Chat History to Computer</p>
+<p>Step 2: Data Cleaning - Combining Txt Files, Removing Non-Chinese Characters and Stop Words, Performing Text Segmentation</p>
+<p>Step 3: Data Analysis - Word Frequency, Sorting, Generating List</p>
+<p>Step 4: Data Visualization - Presenting Word Frequency in Wordcloud</p>
+<p><strong>Introduction</strong></p>
+<p>I started this project in 2021, when I had been working in international education for 5 years. Previously, I had written standard guides on FAQs in the application process, including templates commonly used when filling out online applications and suggestions that we can give students on topics such as research proposals and personal history statements, which was a handy qualitative guide for which I received positive feedback from a dozen colleagues, and, more importantly, an increase in our sales revenue and net promoter score (NPS).</p>
+<p>However, as the admission requirements of schools and students’ conditions change every year along with global political and economic development, students often have new expectations for their application results and our services. When I communicated with them, I was curious to find out how my team and I could further improve our service and provide a better experience for our clients, both before and after they go to study overseas. I wanted to find out what they cared about the most and how to answer their questions effectively, this time adopting a quantitative approach.</p>
+<p>WeChat chat history became the most ideal data for analysis, considering it is the major way for students and their families to communicate with us in China, far more popular than phone calls and emails. In this article, I will introduce the steps of my research and present my analysis result, which would inspire practitioners in the education industry with the similar goal of providing services efficiently to their clients and other stakeholders in order to achieve sustainable growth.</p>
+<p><strong>Step 1: Data Collection - Exporting WeChat Chat History to Computer</strong></p>
+<p>This was the most challenging step of the project, since WeChat only allows users to check chat history in its own app or transfer chat history from one device to another by creating a backup within the app. Nevertheless, there are several ways to obtain the chat history file. </p>
+<p>At first, I planned to transfer chat history from my Android phone to my Windows computer and use 3rd-party software like Root Explorer to get the data file and export chat history that I would like to analyze from the data file, but there were many steps that were rather time-consuming and would create an overwhelming workload, such as rooting the phone and decoding &quot;EnMicroMsg.db,&quot; the SQLite3 database, using a key comprised of the IMEI and UIN of the phone. After studying multiple methods, I used my iPad and MacBook to do the following:</p>
+<ol>
+<li>Backed up WeChat records from my Android phone to my iPad.</li>
+<li>Backed up my iPad data (including WeChat chat history) to my MacBook using iTunes.</li>
+<li>Obtained the &quot;wxbackup&quot; file from the address
+&quot;<Disk>:\Users\<username>\Apple\MobileSync\Backup&quot; (Mac)
+&quot;<Disk>:\Users\<username>\AppData\Roaming\Apple Computer\MobileSync\Backup\&quot; (Windows)</li>
+<li>Extracted and exported chat records with my clients from the &quot;wxbackup&quot; file using 3rd-party software. The software I used was WechatExport-iOS (<a href="https://github.com/stomakun/WechatExport-iOS">https://github.com/stomakun/WechatExport-iOS</a>), which allowed me to select chat records with my clients from all chat records and export them to txt files.</li>
+</ol>
+<p>In this way, I created a corpus of chat records ready for analysis.</p>
+<p><strong>Step 2: Data Cleaning - Combining Txt Files, Removing Non-Chinese Characters and Stop Words, Performing Text Segmentation</strong></p>
+<p>After exporting WeChat chat history to my computer, I acquired a corpus consisting of 118 .txt files, each containing chat history between me and one student, or between me and a WeChat group with one student and their family. Since it would be more efficient to process one file instead of 118 files in Python, I first merged the 118 files with the following codes in Terminal.</p>
+<pre><code><span class="hljs-symbol">&lt;Disk&gt;</span>:
+
+<span class="hljs-keyword">cd</span> <span class="hljs-symbol">&lt;Disk&gt;</span>:&lt;folder path with <span class="hljs-number">118</span> <span class="hljs-keyword">files</span>&gt;
+
+<span class="hljs-built_in">type</span> *.txt &gt; <span class="hljs-keyword">all</span>
+</code></pre><p>Adding a .txt after the file &quot;all&quot; gave me a nice &quot;all.txt&quot; file for the following analysis. In this .txt file, there were many lines of chat records. Here’s how a typical line of a WeChat chat record is presented in the form of codes:</p>
+<p>{</p>
+<pre><code>  <span class="hljs-string">"m_nsFromUsr"</span> : <span class="hljs-string">"&lt;username&gt;"</span>,
+
+  <span class="hljs-string">"m_uiMesLocalID"</span> : <span class="hljs-params">&lt;id&gt;</span>,
+
+  <span class="hljs-string">"m_nsToUsr"</span> : <span class="hljs-string">""</span>,
+
+  <span class="hljs-string">"m_uiCreateTime"</span> : <span class="hljs-params">&lt;time&gt;</span>,
+
+  <span class="hljs-string">"m_uiMessageType"</span> : <span class="hljs-params">&lt;type&gt;</span>,
+
+  <span class="hljs-string">"m_nsRealChatUsr"</span> : <span class="hljs-string">""</span>,
+
+  <span class="hljs-string">"m_uiMesSvrID"</span> : <span class="hljs-params">&lt;id&gt;</span>,
+
+  <span class="hljs-string">"m_nsContent"</span> : <span class="hljs-string">"&lt;content in Chinese characters&gt;"</span>
+
+}
+</code></pre><p>It can be seen from the codes that there is much information unrelated to the topic to be studied in this project, except for the Chinese words, phrases, and sentences in the last line after &quot;m_nsContent.&quot; Since the students are all Chinese who study around the world, the content of communication is all in Chinese, so it is safe to leave out information that is not Chinese.</p>
+<p>In the following codes, I used regular expressions to check whether the contents of &quot;all.txt &quot; match the pattern [\u4E00-\u9FA5], which is a condition for judging whether they are Chinese or not. Characters that are Chinese ones would be saved to &quot;chn.txt.&quot;</p>
+<pre><code><span class="hljs-keyword">import</span> re
+my_file_path = <span class="hljs-string">'&lt;folder path&gt;/all.txt'</span>
+save_file_path = <span class="hljs-string">'&lt;folder path&gt;/chn.txt'</span>
+my_file = <span class="hljs-built_in">open</span>(my_file_path, <span class="hljs-string">'r'</span>, encoding=<span class="hljs-string">'utf-8'</span>)
+cop = re.compile(<span class="hljs-string">"[^\u4e00-\u9fa5^]"</span>)
+<span class="hljs-built_in">for</span> <span class="hljs-built_in">line</span> in my_file.readlines():
+    <span class="hljs-keyword">string</span> = cop.sub(<span class="hljs-string">""</span>, <span class="hljs-built_in">line</span>)
+    save_file = <span class="hljs-built_in">open</span>(save_file_path, <span class="hljs-string">'a'</span>, encoding=<span class="hljs-string">'utf-8'</span>)
+    save_file.<span class="hljs-built_in">write</span>(<span class="hljs-keyword">string</span>)
+    save_file.<span class="hljs-built_in">flush</span>()
+    save_file.<span class="hljs-built_in">close</span>()
+</code></pre><p>After leaving out non-Chinese words, the next step is to remove Chinese stopwords because they are insignificant to the analysis of this project. In the following codes, I used the Chinese stopwords list from this website (<a href="https://github.com/goto456/stopwords">https://github.com/goto456/stopwords</a>) to remove stopwords from my .txt file.</p>
+<pre><code><span class="hljs-keyword">import</span> pandas
+words_df=pandas.DataFrame({'<span class="hljs-attribute">segment'</span>:segment})
+words_df<span class="hljs-variable">.head</span>()
+stopwords=pandas<span class="hljs-variable">.read_csv</span>("stopwords<span class="hljs-variable">.txt</span>",index_col=False,quoting=3,sep="\t",names=['stopword'],encoding="gb18030")
+words_df=words_df[~words_df<span class="hljs-variable">.segment</span><span class="hljs-variable">.isin</span>(stopwords<span class="hljs-variable">.stopword</span>)]
+</code></pre><p>Now that I had removed stopwords, text segmentation was ready to be performed, since key words and word frequency in chat history would be the focus of the analysis. I used &quot;Jieba&quot; (Chinese for &quot;to stutter&quot;), a Chinese word segmentation module, to finish this step.</p>
+<pre><code><span class="hljs-keyword">import</span> jieba
+<span class="hljs-keyword">import</span> codecs
+file=codecs.open(<span class="hljs-string">u"chn.txt"</span>,<span class="hljs-string">'r'</span>,encoding=<span class="hljs-string">'utf-8'</span>)
+content=file.read()
+file.close()
+segment=[]
+segs=jieba.cut(content) 
+<span class="hljs-keyword">for</span> seg <span class="hljs-keyword">in</span> segs:
+    <span class="hljs-keyword">if</span> len(seg)&gt;<span class="hljs-number">1</span> <span class="hljs-keyword">and</span> seg!=<span class="hljs-string">'\r\n'</span>:
+        segment.append(seg)
+</code></pre><p>And now the data is clean and ready for the next step: analysis of word frequency.</p>
+<p><strong>Step 3: Data Analysis - Word Frequency, Sorting, Generating List</strong></p>
+<p>In this step, I ran the following codes to see word frequency and sort the words.</p>
+<pre><code>words_stat=words_df.groupby(<span class="hljs-keyword">by</span>=[<span class="hljs-string">'segment'</span>])[<span class="hljs-string">'segment'</span>].agg({<span class="hljs-string">"wordsfrequency"</span>:numpy.size})
+words_stat=words_stat.reset_index().sort_values(<span class="hljs-keyword">by</span>=<span class="hljs-string">"wordsfrequency"</span>,<span class="hljs-keyword">ascending</span>=False)
+words_stat
+</code></pre><p>Since I would like a file with clearer results for future analysis and presentation to related stakeholders, such as company supervisors, I added an extra step of generating word frequency files.</p>
+<pre><code>result2txt=str(words_stat)  
+<span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">'list.txt'</span>,<span class="hljs-string">'a'</span>) <span class="hljs-keyword">as</span> file_handle:  
+    file_handle.<span class="hljs-built_in">write</span>(result2txt) 
+    file_handle.<span class="hljs-built_in">write</span>(<span class="hljs-string">'\n'</span>) 
+</code></pre><p>The results are shown in “list.txt,” as the following list showed. </p>
+<pre><code> segment    wordsfrequency
+ <span class="hljs-number">9526</span>       老师  <span class="hljs-number">4011</span>
+ <span class="hljs-number">4488</span>       学校  <span class="hljs-number">2717</span>
+ <span class="hljs-number">6443</span>       提交  <span class="hljs-number">1410</span>
+ <span class="hljs-number">8416</span>       申请  <span class="hljs-number">1402</span>
+ <span class="hljs-number">6428</span>      推荐信  <span class="hljs-number">1148</span>
+ <span class="hljs-number">11199</span>      邮件   <span class="hljs-number">941</span>
+ <span class="hljs-number">9400</span>       网申   <span class="hljs-number">912</span>
+ <span class="hljs-number">8451</span>       电脑   <span class="hljs-number">889</span>
+ <span class="hljs-number">5879</span>      成绩单   <span class="hljs-number">840</span>
+ <span class="hljs-number">11207</span>      邮箱   <span class="hljs-number">821</span>
+ <span class="hljs-number">10496</span>      谢谢   <span class="hljs-number">785</span>
+ <span class="hljs-number">5495</span>       微信   <span class="hljs-number">775</span>
+ <span class="hljs-number">6540</span>       收到   <span class="hljs-number">716</span>
+ <span class="hljs-number">6932</span>       明天   <span class="hljs-number">658</span>
+ <span class="hljs-number">10289</span>      证明   <span class="hljs-number">619</span>
+ <span class="hljs-number">538</span>        不用   <span class="hljs-number">602</span>
+ <span class="hljs-number">6427</span>      推荐人   <span class="hljs-number">599</span>
+ <span class="hljs-number">6918</span>       时间   <span class="hljs-number">570</span>
+ <span class="hljs-number">11641</span>      项目   <span class="hljs-number">549</span>
+ ...       ...   ...
+ <span class="hljs-number">3222</span>     名正言顺     <span class="hljs-number">1</span>
+ <span class="hljs-number">3224</span>       名点     <span class="hljs-number">1</span>
+ <span class="hljs-number">7401</span>       格好     <span class="hljs-number">1</span>
+ <span class="hljs-number">7400</span>       根绝     <span class="hljs-number">1</span>
+ <span class="hljs-number">0</span>          一万     <span class="hljs-number">1</span>
+ [<span class="hljs-number">11867</span> rows x <span class="hljs-number">2</span> columns]
+</code></pre><p>Words that rank in the top five are &quot;老师(teacher)&quot;, &quot;学校(school)&quot;, &quot;提交(submit)&quot;, &quot;申请(application)&quot;, and &quot;推荐信(recommendation letters,)&quot; with frequencies of 4011, 2717, 1410, 1402 and 1148 respectively, showing that submitting applications and recommendation letters are topics that play a vital role in students’ study abroad applications and that students pay extra attention to. Other topics worth noticing include &quot;网申(online application)&quot; that occurred 912 times, &quot;成绩单(transcript)&quot; that occurred 840 times, &quot;证明(certificate)&quot; that occurred 619 times, and &quot;推荐人(recommender)&quot; that occurred 599 times. Compared with topics that are less frequently seen in chat history, these words with high frequency and related topics, such as how to submit an online application and how to order transcripts that fit the requirements of schools, should be given more focus by education service providers.</p>
+<p>Up until now, I have got a list of high-frequency words, and there is still one step to do before I report my findings to my supervisor, which is data visualization. I will elaborate on the visualization, conclusion, and my reflection on this project in the next part.</p>
+<p><strong>Step 4: Data Visualization - Presenting Word Frequency in Wordcloud</strong></p>
+<p>A word cloud that can show word frequencies is suitable for this project. Upon first glance, audiences can see the words and their frequency ratio with other words. Using the following code, I generated a word cloud using words in &quot;list.txt.&quot;</p>
+<pre><code><span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+<span class="hljs-title">from</span> scipy.misc <span class="hljs-keyword">import</span> imread
+<span class="hljs-title">from</span> wordcloud <span class="hljs-keyword">import</span> WordCloud,ImageColorGenerator
+%matplotlib
+<span class="hljs-title">bimg</span>=imread('&lt;path <span class="hljs-keyword">of</span> the shape the wordcloud would be <span class="hljs-keyword">in</span>&gt;')
+<span class="hljs-title">wordcloud</span>=<span class="hljs-type">WordCloud</span>(background_color=<span class="hljs-string">"white"</span>,mask=bimg,font_path='&lt;path <span class="hljs-keyword">of</span> the font&gt;')
+<span class="hljs-meta">#wordcloud=wordcloud.fit_words(words_stat.head(4000).itertuples(index=False))</span>
+<span class="hljs-title">words</span> = words_stat.set_index(<span class="hljs-string">"segment"</span>).to_dict()
+<span class="hljs-title">wordcloud</span>=wordcloud.fit_words(words[<span class="hljs-string">"wordsfrequency"</span>])
+<span class="hljs-title">bimgColors</span>=<span class="hljs-type">ImageColorGenerator</span>(bimg)
+<span class="hljs-title">plt</span>.axis(<span class="hljs-string">"off"</span>)
+<span class="hljs-title">plt</span>.imshow(wordcloud.recolor(color_func=bimgColors))
+<span class="hljs-title">plt</span>.show()
+</code></pre><p><img src="https://user-images.githubusercontent.com/118432046/202845775-74f011c5-2d3e-4c60-8746-2f9dd742f05d.png" alt="image"></p>
+<p><strong>Conclusion: Feedback, Impact, Limitation, and Future Work</strong></p>
+<p>The analysis results, which contained word frequency and suggested topics that we can put more focus and effort on when providing services to students, were recognized and acknowledged by the director of the department and served as an essential reference and inspiration for both internal training sessions and daily work in the department and later in the company. I&#39;d like to thank Fiona, who was my director at the time, because this project would not have been possible without our shared belief in the value of data analytics in education services, her unwavering support of my efforts to improve business performance, and the many internal resources she gave me to help me reach my goal and vision.</p>
+<p>Regarding the sampling, the absolute prevalence of WeChat in China provided the project with sufficient chat records. Meanwhile, I ensured the sampling of students was balanced to the greatest extent possible: Because I&#39;ve been collecting data for the past five years, I know that the students came from almost every major, including business, the arts and liberal sciences, natural science, and engineering.</p>
+<p>In the future, I hope to gain more insights by dividing students into groups with varying expectations and behaviors and examining differences in their chat histories. For example, what topics do students with low GPAs (GPA below 3.0/4.0) or high GPAs (GPA above 3.6/4.0) care about the most, and what topics do students who take their undergraduate studies in mainland China or overseas care about the most? Answering these questions necessitates more effort on the part of education service providers in developing appropriate databases, which is one limitation of this project as well as my motivation to pursue a master&#39;s degree in business informatics in the coming years. By carefully collecting data with acute business sense and effective communication skills and adopting a combinative approach of quantitative analysis and qualitative explanation, I am confident I can provide insightful support for my future company and help it achieve outstanding business performance.</p>
+</body>
+</html>
