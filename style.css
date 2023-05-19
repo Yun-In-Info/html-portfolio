@@ -124,27 +124,50 @@ h3 a{
 }
 
 /* Set styles for the content */
-.content {
-  margin-left: 200px; /* Adjust the value to match the menu width */
-  padding: 20px;
+@media (min-width: 600px) {
+  .content {
+    margin-left: 200px; /* Adjust the value to match the menu width */
+    padding: 20px;
+  }
+
+
+  .content-wrapper {
+    margin-left: 200px;
+    padding: 20px;
+  }
 }
 
-.content-wrapper {
-  margin-left: 200px;
-  padding: 20px;
+@media (max-width: 600px) {
+  .menu {
+   position: fixed;
+   /* Adjust menu styles for mobile devices, e.g., position: fixed; */
+ }
+
+  .menu:hover{
+    z-index: 2;
+  }
+
+ .content-wrapper {
+   position: relative;
+   margin-top: 250px;
+   width: 100%;
+   z-index: 1;
+   /* Adjust content wrapper styles for mobile devices, e.g., position: relative; */
+ }
 }
 
-.content-wrapper img {
-  max-width: 100%;
-  height: auto;
-}
+  .content-wrapper img {
+    max-width: 100%;
+    height: auto;
+  }
 
-.content-wrapper code {
-  max-width: 100%;
-  display: inline-block;
-  overflow-x: auto;
-  white-space: nowrap;
-}
+  .content-wrapper code {
+    max-width: 100%;
+    display: inline-block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
 
 /* Set styles for the content blocks */
 .content-block {
@@ -162,3 +185,4 @@ h3 a{
   padding: 10px;
   text-align: center;
 }
+
