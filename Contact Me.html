@@ -38,12 +38,18 @@
     <div class="content-wrapper">
         <div class="content-block" id="./Contact Me.html">
         <h2>Contact Me</h2>
-            <form id="contact-form">
-                <input type="text" name="name" placeholder="Your Name" required>
-                <input type="email" name="email" placeholder="Your Email" required>
-                <textarea name="message" placeholder="Your Message" required></textarea>
-                <button type="submit">Submit</button>
-            </form>
+                <div id="contact">
+                    <h3>Let's get in touch!</h3>
+                    <div id="contact-form">
+                            <form action="https://formspree.io/f/xwkjjkra" method="POST">
+                            <input type="hidden" name="_subject" value="Contact request from personal website" />
+                            <input type="name" name="name" placeholder="Your Name" required>
+                            <input type="email" name="_replyto" placeholder="Your Email" required>
+                            <textarea name="message" placeholder="Your Message" required></textarea>
+                            <button type="submit">Send</button>
+                        </form>
+                    </div>
+                </div>
         </div>
     </div>
 </body>
